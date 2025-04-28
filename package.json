@@ -1,0 +1,14 @@
+{
+  "name": "json-to-sqlite",
+  "version": "1.0.0",
+  "description": "Outil pour transférer des données JSON vers SQLite",
+  "main": "json-to-sqlite.js",
+  "type": "module",
+  "scripts": {
+    "start": "node json-to-sqlite.js",
+    "start-advanced": "node json-to-sqlite-advanced.js"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.7"
+  }
+}

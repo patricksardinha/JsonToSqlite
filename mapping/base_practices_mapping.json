@@ -1,0 +1,10 @@
+{
+  "name": "title",
+  "isApplicable": "applicable",
+  "priority": "priority",
+  "severity": "severity",
+  "user_response": "user_response",
+  "aspiceStatus": "status",
+  "prmilestoneacronyme": "dpp_id",
+  "prmilestone": "milestone_name"
+}
