@@ -1,14 +1,31 @@
 {
-  "name": "json-to-sqlite",
-  "version": "1.0.0",
-  "description": "Outil pour transférer des données JSON vers SQLite",
-  "main": "json-to-sqlite.js",
+  "name": "json-sqlite-manager",
+  "private": true,
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "start": "node json-to-sqlite.js",
-    "start-advanced": "node json-to-sqlite-advanced.js"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
   },
   "dependencies": {
-    "sqlite3": "^5.1.7"
+    "@tailwindcss/vite": "^4.1.4",
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-dialog": "^2.2.1",
+    "@tauri-apps/plugin-fs": "^2.2.1",
+    "@tauri-apps/plugin-opener": "^2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.5.3",
+    "tailwindcss": "^4.1.4"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3"
   }
 }
