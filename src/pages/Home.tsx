@@ -68,9 +68,9 @@ const Home: React.FC = () => {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Étape 1 */}
-                <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
-                  <div className={`flex items-center justify-center w-12 h-12 mb-4 rounded-full ${isDarkMode ? 'bg-blue-600' : 'bg-blue-100'}`}>
-                    <span className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-blue-800'}`}>1</span>
+                <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <div className={`flex items-center justify-center w-12 h-12 mb-4 rounded-full ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                    <span className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>1</span>
                   </div>
                   <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                     Sélection des fichiers
@@ -81,9 +81,9 @@ const Home: React.FC = () => {
                 </div>
                 
                 {/* Étape 2 */}
-                <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
-                  <div className={`flex items-center justify-center w-12 h-12 mb-4 rounded-full ${isDarkMode ? 'bg-blue-600' : 'bg-blue-100'}`}>
-                    <span className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-blue-800'}`}>2</span>
+                <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <div className={`flex items-center justify-center w-12 h-12 mb-4 rounded-full ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                    <span className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>2</span>
                   </div>
                   <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                     Configuration
@@ -94,9 +94,9 @@ const Home: React.FC = () => {
                 </div>
                 
                 {/* Étape 3 */}
-                <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
-                  <div className={`flex items-center justify-center w-12 h-12 mb-4 rounded-full ${isDarkMode ? 'bg-blue-600' : 'bg-blue-100'}`}>
-                    <span className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-blue-800'}`}>3</span>
+                <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <div className={`flex items-center justify-center w-12 h-12 mb-4 rounded-full ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                    <span className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>3</span>
                   </div>
                   <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                     Exécution

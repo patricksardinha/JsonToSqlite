@@ -690,13 +690,14 @@ const ImportPage: React.FC = () => {
           )}
 
           {step === 6 && (
-            <div className="flex flex-col h-full max-h-full">
+            <div className="flex flex-col h-full">
               <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-blue-400' : 'text-gray-800'}`}>
                 Résultats d'importation
               </h2>
               
-              <div className={`flex-1 overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`} style={{ maxHeight: 'calc(100vh - 220px)' }}>
-                <div className={`p-4 border rounded-md mb-4 ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+              {/* Conteneur principal avec hauteur max pour permettre aux boutons d'être visibles */}
+              <div className="flex flex-col space-y-4 overflow-auto mb-4" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+                <div className={`p-4 border rounded-md ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
                   <h3 className={`font-medium mb-3 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Progression</h3>
                   
                   <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
@@ -706,8 +707,8 @@ const ImportPage: React.FC = () => {
                     ></div>
                   </div>
                   
-                  <div className={`flex justify-between text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    <span>
+                  <div className={`flex flex-wrap justify-between text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <span className="mb-1">
                       {progress 
                         ? `${Math.round((progress.processed / progress.total) * 100)}% - ${progress.processed}/${progress.total} objets traités`
                         : "En attente..."
@@ -725,11 +726,11 @@ const ImportPage: React.FC = () => {
                 <div className={`p-4 border rounded-md ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
                   <h3 className={`font-medium mb-3 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Logs d'importation</h3>
                   
-                  <div className={`border rounded-md h-96 overflow-auto scrollbar-styled ${
+                  <div className={`border rounded-md overflow-auto scrollbar-styled ${
                     isDarkMode 
                       ? 'bg-gray-900 border-gray-700' 
                       : 'bg-gray-50 border-gray-300'
-                  }`}>
+                  }`} style={{ maxHeight: '300px' }}>
                     <div className="font-mono text-xs p-4 space-y-1">
                       {logs.length === 0 
                         ? <div className={isDarkMode ? 'text-gray-500' : 'text-gray-400'}>
@@ -752,7 +753,7 @@ const ImportPage: React.FC = () => {
                 </div>
                 
                 {!isProcessing && progress && progress.processed === progress.total && (
-                  <div className={`mt-6 p-4 border rounded-md mb-8 ${
+                  <div className={`p-4 border rounded-md ${
                     isDarkMode 
                       ? 'bg-green-900 border-green-800' 
                       : 'bg-green-50 border-green-200'
@@ -768,7 +769,8 @@ const ImportPage: React.FC = () => {
                 )}
               </div>
               
-              <div className="flex justify-between mt-6">
+              {/* Zone de boutons avec position fixe en bas de la section */}
+              <div className="flex justify-between mt-2 py-2 sticky bottom-0 bg-inherit">
                 <button
                   className={`px-4 py-2 rounded-md transition ${
                     isDarkMode 

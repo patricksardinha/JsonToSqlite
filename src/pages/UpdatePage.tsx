@@ -204,14 +204,22 @@ const UpdatePage: React.FC = () => {
       };
 
       // Appel de la fonction de mise à jour
-      showToast('info', 'Mise à jour en cours...');
+      showToast('info', 'Mise à jour en cours... Redirection vers la page de résultats...');
+      
+      // Redirection vers l'onglet des résultats
+      setTimeout(() => {
+        setStep(6);
+      }, 1500);
+
       await invoke('update_sqlite_from_json', { config });
     } catch (err) {
       console.error("Erreur dans startUpdate :", err);
       showToast('error', `Erreur lors de la mise à jour: ${err instanceof Error ? err.message : String(err)}`);
       setLogs(prev => [...prev, `Erreur: ${err instanceof Error ? err.message : String(err)}`]);
     } finally {
-      setIsProcessing(false);
+      setTimeout(() => {
+        setIsProcessing(false);
+      }, 1500);
     }
   };
 
@@ -265,6 +273,15 @@ const UpdatePage: React.FC = () => {
                 disabled={!selectedTable || !keyColumn || updateColumns.length === 0}
               >
                 4. Mapping des champs
+              </button>
+            </li>
+            <li className={`p-2 rounded ${step === 6 ? (isDarkMode ? 'bg-gray-700 text-blue-300' : 'bg-blue-100 text-blue-700') : ''} ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'}`}>
+              <button 
+                className={`w-full text-left ${!isProcessing && !progress ? (isDarkMode ? 'text-gray-500' : 'text-gray-400') : ''}`}
+                onClick={() => setStep(6)} 
+                disabled={!isProcessing && !progress}
+              >
+                5. Résultats de mise à jour
               </button>
             </li>
           </ul>
@@ -568,17 +585,29 @@ const UpdatePage: React.FC = () => {
                   {isProcessing ? "Traitement en cours..." : "Lancer la mise à jour"}
                 </button>
               </div>
+            </div>
+          )}
 
-              {(isProcessing || progress) && (
-                <div className="mt-6">
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+          {step === 6 && (
+            <div className="flex flex-col h-full">
+              <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-blue-400' : 'text-gray-800'}`}>
+                Résultats de mise à jour
+              </h2>
+              
+              {/* Conteneur principal avec hauteur max pour permettre aux boutons d'être visibles */}
+              <div className="flex flex-col space-y-4 overflow-auto mb-4" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+                <div className={`p-4 border rounded-md ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+                  <h3 className={`font-medium mb-3 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Progression</h3>
+                  
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
                     <div 
                       className="bg-blue-600 h-2.5 rounded-full" 
                       style={{ width: `${progress ? Math.round((progress.processed / progress.total) * 100) : 0}%` }}
                     ></div>
                   </div>
-                  <div className={`flex justify-between mt-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    <span>
+                  
+                  <div className={`flex flex-wrap justify-between text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <span className="mb-1">
                       {progress 
                         ? `${Math.round((progress.processed / progress.total) * 100)}% - ${progress.processed}/${progress.total} objets traités`
                         : "En attente..."
@@ -591,12 +620,17 @@ const UpdatePage: React.FC = () => {
                       }
                     </span>
                   </div>
-                  <div className={`mt-4 p-4 border rounded-md h-40 overflow-auto ${
+                </div>
+                
+                <div className={`p-4 border rounded-md ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+                  <h3 className={`font-medium mb-3 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Logs de mise à jour</h3>
+                  
+                  <div className={`border rounded-md overflow-auto scrollbar-styled ${
                     isDarkMode 
-                      ? 'bg-gray-800 border-gray-700' 
+                      ? 'bg-gray-900 border-gray-700' 
                       : 'bg-gray-50 border-gray-300'
-                  }`}>
-                    <div className="font-mono text-xs space-y-1">
+                  }`} style={{ maxHeight: '300px' }}>
+                    <div className="font-mono text-xs p-4 space-y-1">
                       {logs.length === 0 
                         ? <div className={isDarkMode ? 'text-gray-500' : 'text-gray-400'}>
                             Les logs de mise à jour apparaîtront ici...
@@ -604,7 +638,7 @@ const UpdatePage: React.FC = () => {
                         : logs.map((log, index) => (
                             <div key={index} className={
                               log.includes("Erreur") 
-                                ? (isDarkMode ? "text-red-400" : "text-red-600") 
+                                ? (isDarkMode ? "text-red-400" : "text-red-600")
                                 : log.includes("terminée") 
                                 ? (isDarkMode ? "text-green-400 font-medium" : "text-green-600 font-medium")
                                 : (isDarkMode ? "text-gray-200" : "text-gray-800")
@@ -616,32 +650,49 @@ const UpdatePage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              )}
-
-              {!isProcessing && progress && progress.processed === progress.total && (
-                <div className={`mt-6 p-4 border rounded-md mb-8 ${
-                  isDarkMode 
-                    ? 'bg-green-900 border-green-800' 
-                    : 'bg-green-50 border-green-200'
-                }`}>
-                  <h3 className={`font-medium mb-2 ${
-                    isDarkMode ? 'text-green-300' : 'text-green-700'
-                  }`}>Mise à jour terminée</h3>
-                  <p className={isDarkMode ? 'text-green-200' : 'text-green-600'}>
-                    {progress.succeeded} enregistrements mis à jour avec succès.
-                    {progress.failed > 0 && ` ${progress.failed} enregistrements ont échoué.`}
-                  </p>
-                  
-                  <div className="mt-4 flex space-x-4">
-                    <button
-                      onClick={resetUpdate}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                    >
-                      Nouvelle mise à jour
-                    </button>
+                
+                {!isProcessing && progress && progress.processed === progress.total && (
+                  <div className={`p-4 border rounded-md ${
+                    isDarkMode 
+                      ? 'bg-green-900 border-green-800' 
+                      : 'bg-green-50 border-green-200'
+                  }`}>
+                    <h3 className={`font-medium mb-2 ${
+                      isDarkMode ? 'text-green-300' : 'text-green-700'
+                    }`}>Mise à jour terminée</h3>
+                    <p className={isDarkMode ? 'text-green-200' : 'text-green-600'}>
+                      {progress.succeeded} enregistrements mis à jour avec succès.
+                      {progress.failed > 0 && ` ${progress.failed} enregistrements ont échoué.`}
+                    </p>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+              
+              {/* Zone de boutons avec position fixe en bas de la section */}
+              <div className="flex justify-between mt-2 py-2 sticky bottom-0 bg-inherit">
+                <button
+                  className={`px-4 py-2 rounded-md transition ${
+                    isDarkMode 
+                      ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' 
+                      : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                  }`}
+                  onClick={() => setStep(4)}
+                  disabled={isProcessing}
+                >
+                  Retour à la configuration
+                </button>
+                <button
+                  onClick={resetUpdate}
+                  className={`px-4 py-2 rounded-md transition ${
+                    isDarkMode 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                  disabled={isProcessing}
+                >
+                  Nouvelle mise à jour
+                </button>
+              </div>
             </div>
           )}
         </div>
