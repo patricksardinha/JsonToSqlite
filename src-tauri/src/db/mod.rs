@@ -38,7 +38,7 @@ pub fn analyze_table(db_path: &str, table_name: &str) -> Result<TableInfo, Strin
     // Récupération des informations sur les colonnes avec une requête SQL directe au lieu de PRAGMA
     let query = format!(
         "SELECT * FROM pragma_table_info('{}') ORDER BY cid",
-        table_name.replace("'", "''") // Échapper les apostrophes pour éviter les injections SQL
+        table_name.replace("'", "''") // Échapper les apostrophes 
     );
 
     let mut columns = Vec::new();

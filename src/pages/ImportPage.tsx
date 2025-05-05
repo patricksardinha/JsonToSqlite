@@ -84,7 +84,7 @@ const ImportPage: React.FC = () => {
       return;
     }
   
-    // Utiliser l'API Tauri pour lire le contenu du fichier
+    // API Tauri pour lire le contenu du fichier
     const readFile = async () => {
       try {
         const content = await readTextFile(jsonFile.path);
@@ -130,7 +130,6 @@ const ImportPage: React.FC = () => {
       
       // Vérifier si le processus est terminé
       if (event.payload.processed === event.payload.total) {
-        const message = event.payload.status;
         if (event.payload.failed === 0) {
           showToast('success', `Importation terminée avec succès! ${event.payload.succeeded} enregistrements importés.`);
         } else {
@@ -213,28 +212,33 @@ const ImportPage: React.FC = () => {
       };
 
       // Appel de la fonction d'importation
-      showToast('info', 'Importation en cours...');
+      showToast('info', 'Importation en cours... Redirection vers la page de résultats...');
+      
+      // Redirection vers l'onglet des résultats
+      setTimeout(() => {
+        setStep(6);
+      }, 1500);
+
       await invoke('import_json_to_sqlite', { config });
     } catch (err) {
       console.error("Erreur dans startImport :", err);
       showToast('error', `Erreur lors de l'importation: ${err instanceof Error ? err.message : String(err)}`);
       setLogs(prev => [...prev, `Erreur: ${err instanceof Error ? err.message : String(err)}`]);
     } finally {
-      setIsProcessing(false);
+      setTimeout(() => {
+        setIsProcessing(false);
+      }, 1500);
     }
   };
 
   return (
     <div className={`flex flex-col h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'}`}>
-      {/* Notifications Toast */}
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
       
-      {/* Main content */}
       <main className={`flex flex-1 overflow-hidden ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        {/* Left sidebar - Steps */}
         <div className={`w-64 p-4 border-r ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'}`}>
           <div className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-700'}`}>
-            Importation JSON → SQLite
+            Import JSON → SQLite
           </div>
           <ul>
             <li className={`p-2 rounded ${step === 1 ? (isDarkMode ? 'bg-gray-700 text-blue-300' : 'bg-blue-100 text-blue-700') : ''} ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'}`}>
@@ -278,9 +282,17 @@ const ImportPage: React.FC = () => {
                 5. Configuration avancée
               </button>
             </li>
+            <li className={`p-2 rounded ${step === 6 ? (isDarkMode ? 'bg-gray-700 text-blue-300' : 'bg-blue-100 text-blue-700') : ''} ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'}`}>
+              <button 
+                className={`w-full text-left ${!isProcessing && !progress ? (isDarkMode ? 'text-gray-500' : 'text-gray-400') : ''}`}
+                onClick={() => setStep(6)} 
+                disabled={!isProcessing && !progress}
+              >
+                6. Résultats d'importation
+              </button>
+            </li>
           </ul>
           
-          {/* Bouton de réinitialisation */}
           <div className={`mt-6 pt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-300'}`}>
             <button
               className={`w-full p-2 text-sm rounded-md transition ${
@@ -296,8 +308,7 @@ const ImportPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Main content area */}
-        <div className="flex-1 p-6 overflow-auto">
+        <div className="flex-1 mr-2 pl-4 overflow-auto">
           {step === 1 && (
             <div>
               <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-blue-400' : 'text-gray-800'}`}>
@@ -323,8 +334,12 @@ const ImportPage: React.FC = () => {
               />
 
               <div className="flex justify-end mt-6">
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+              <button
+                  className={`px-4 py-2 rounded-md transition ${
+                    !jsonFile.file || !dbFile.file 
+                      ? (isDarkMode ? 'bg-blue-800 text-blue-300 opacity-50 cursor-not-allowed' : 'bg-blue-300 text-blue-700 opacity-50 cursor-not-allowed')
+                      : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
+                  }`}
                   onClick={() => setStep(2)}
                   disabled={!jsonFile.file || !dbFile.file}
                 >
@@ -335,24 +350,26 @@ const ImportPage: React.FC = () => {
           )}
 
           {step === 2 && (
-            <div>
+            <div className="flex flex-col h-full max-h-full">
               <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-blue-400' : 'text-gray-800'}`}>
                 Structure JSON
               </h2>
               
-              <div className="grid grid-cols-2 gap-6">
-                <div>
+              <div className="grid grid-cols-2 gap-6 flex-1 overflow-hidden" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+                <div className="flex flex-col h-full overflow-hidden">
                   <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Aperçu JSON
                   </label>
-                  <JsonPreview 
-                    jsonContent={jsonContent}
-                    className="mb-4"
-                    isDarkMode={isDarkMode}
-                  />
+                  <div className="flex-1 min-h-0">
+                    <JsonPreview 
+                      jsonContent={jsonContent}
+                      className="h-full"
+                      isDarkMode={isDarkMode}
+                    />
+                  </div>
                 </div>
                 
-                <div>
+                <div className="flex flex-col h-full overflow-hidden">
                   <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Chemin racine JSON
                   </label>
@@ -373,16 +390,18 @@ const ImportPage: React.FC = () => {
                     />
                   </div>
                   
-                  <div>
+                  <div className="flex-1 min-h-0 flex flex-col"> 
                     <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                       Structure détectée
                     </label>
-                    <JsonPathExplorer 
-                      jsonFilePath={jsonFile.path}
-                      onPathSelect={setJsonRoot}
-                      selectedPath={jsonRoot}
-                      isDarkMode={isDarkMode}
-                    />
+                    <div className="flex-1 min-h-0"> 
+                      <JsonPathExplorer 
+                        jsonFilePath={jsonFile.path}
+                        onPathSelect={setJsonRoot}
+                        selectedPath={jsonRoot}
+                        isDarkMode={isDarkMode}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -526,7 +545,8 @@ const ImportPage: React.FC = () => {
                   </label>
                   <p className={`text-sm mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                     Ces valeurs remplaceront systématiquement les données du JSON, même si elles existent.
-                    Idéal pour uniformiser des données ou ajouter des champs comme "date_import" ou "source".
+                    Ceci permet d'uniformiser des données ou ajouter des champs supplémentaires comme par exemple "date_import" ou "source".
+
                   </p>
                   <div className={`border rounded-md p-4 h-60 overflow-auto ${
                     isDarkMode 
@@ -654,16 +674,39 @@ const ImportPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Section de progression et logs */}
-              {(isProcessing || progress) && (
-                <div className="mt-6">
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+              {isProcessing && (
+                <div className={`mt-6 p-3 border rounded-md ${
+                  isDarkMode 
+                    ? 'bg-blue-900 border-blue-800 text-blue-200' 
+                    : 'bg-blue-50 border-blue-200 text-blue-700'
+                }`}>
+                  <p className="flex items-center">
+                    <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></span>
+                    Traitement en cours. Vous serez redirigé vers l'onglet de résultats...
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {step === 6 && (
+            <div className="flex flex-col h-full max-h-full">
+              <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-blue-400' : 'text-gray-800'}`}>
+                Résultats d'importation
+              </h2>
+              
+              <div className={`flex-1 overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`} style={{ maxHeight: 'calc(100vh - 220px)' }}>
+                <div className={`p-4 border rounded-md mb-4 ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+                  <h3 className={`font-medium mb-3 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Progression</h3>
+                  
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
                     <div 
                       className="bg-blue-600 h-2.5 rounded-full" 
                       style={{ width: `${progress ? Math.round((progress.processed / progress.total) * 100) : 0}%` }}
                     ></div>
                   </div>
-                  <div className={`flex justify-between mt-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  
+                  <div className={`flex justify-between text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                     <span>
                       {progress 
                         ? `${Math.round((progress.processed / progress.total) * 100)}% - ${progress.processed}/${progress.total} objets traités`
@@ -677,12 +720,17 @@ const ImportPage: React.FC = () => {
                       }
                     </span>
                   </div>
-                  <div className={`mt-4 p-4 border rounded-md h-40 overflow-auto ${
+                </div>
+                
+                <div className={`p-4 border rounded-md ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+                  <h3 className={`font-medium mb-3 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Logs d'importation</h3>
+                  
+                  <div className={`border rounded-md h-96 overflow-auto scrollbar-styled ${
                     isDarkMode 
-                      ? 'bg-gray-800 border-gray-700' 
+                      ? 'bg-gray-900 border-gray-700' 
                       : 'bg-gray-50 border-gray-300'
                   }`}>
-                    <div className="font-mono text-xs space-y-1">
+                    <div className="font-mono text-xs p-4 space-y-1">
                       {logs.length === 0 
                         ? <div className={isDarkMode ? 'text-gray-500' : 'text-gray-400'}>
                             Les logs d'importation apparaîtront ici...
@@ -702,33 +750,48 @@ const ImportPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              )}
-
-              {/* Section des résultats après importation réussie */}
-              {!isProcessing && progress && progress.processed === progress.total && (
-                <div className={`mt-6 p-4 border rounded-md mb-8 ${
-                  isDarkMode 
-                    ? 'bg-green-900 border-green-800' 
-                    : 'bg-green-50 border-green-200'
-                }`}>
-                  <h3 className={`font-medium mb-2 ${
-                    isDarkMode ? 'text-green-300' : 'text-green-700'
-                  }`}>Importation terminée</h3>
-                  <p className={isDarkMode ? 'text-green-200' : 'text-green-600'}>
-                    {progress.succeeded} enregistrements importés avec succès.
-                    {progress.failed > 0 && ` ${progress.failed} enregistrements ont échoué.`}
-                  </p>
-                  
-                  <div className="mt-4 flex space-x-4">
-                    <button
-                      onClick={resetImport}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                    >
-                      Nouvelle importation
-                    </button>
+                
+                {!isProcessing && progress && progress.processed === progress.total && (
+                  <div className={`mt-6 p-4 border rounded-md mb-8 ${
+                    isDarkMode 
+                      ? 'bg-green-900 border-green-800' 
+                      : 'bg-green-50 border-green-200'
+                  }`}>
+                    <h3 className={`font-medium mb-2 ${
+                      isDarkMode ? 'text-green-300' : 'text-green-700'
+                    }`}>Importation terminée</h3>
+                    <p className={isDarkMode ? 'text-green-200' : 'text-green-600'}>
+                      {progress.succeeded} enregistrements importés avec succès.
+                      {progress.failed > 0 && ` ${progress.failed} enregistrements ont échoué.`}
+                    </p>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+              
+              <div className="flex justify-between mt-6">
+                <button
+                  className={`px-4 py-2 rounded-md transition ${
+                    isDarkMode 
+                      ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' 
+                      : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                  }`}
+                  onClick={() => setStep(5)}
+                  disabled={isProcessing}
+                >
+                  Retour à la configuration
+                </button>
+                <button
+                  onClick={resetImport}
+                  className={`px-4 py-2 rounded-md transition ${
+                    isDarkMode 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                  disabled={isProcessing}
+                >
+                  Nouvelle importation
+                </button>
+              </div>
             </div>
           )}
         </div>

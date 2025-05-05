@@ -85,6 +85,11 @@ pub async fn json_analyze_structure(json_path: String) -> Result<Vec<JsonPathInf
     json::analyze_structure(&json_path).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+pub fn json_analyze_structure_progressive(json_path: String, window: tauri::Window) -> Result<(), String> {
+    json::analyze_structure_progressive(&json_path, window)
+}
+
 /// Récupère un échantillon d'objets depuis un chemin JSON
 #[tauri::command]
 pub async fn json_get_sample(

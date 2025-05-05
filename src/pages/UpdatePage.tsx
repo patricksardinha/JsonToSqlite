@@ -82,7 +82,7 @@ const UpdatePage: React.FC = () => {
       return;
     }
 
-    // Utiliser l'API Tauri pour lire le contenu du fichier
+    // API Tauri pour lire le contenu du fichier
     const readFile = async () => {
       try {
         const content = await readTextFile(jsonFile.path);
@@ -152,7 +152,6 @@ const UpdatePage: React.FC = () => {
   // Afficher une notification toast
   const showToast = (type: 'success' | 'error' | 'info', message: string) => {
     setToast({ type, message });
-    // Masquer automatiquement après 5 secondes
     setTimeout(() => setToast(null), 5000);
   };
 
@@ -228,12 +227,9 @@ const UpdatePage: React.FC = () => {
 
   return (
     <div className={`flex flex-col h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'}`}>
-      {/* Notifications Toast */}
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
       
-      {/* Main content */}
       <main className={`flex flex-1 overflow-hidden ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        {/* Left sidebar - Steps */}
         <div className={`w-64 p-4 border-r ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'}`}>
           <div className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-700'}`}>
             Mise à jour SQLite
@@ -273,7 +269,6 @@ const UpdatePage: React.FC = () => {
             </li>
           </ul>
           
-          {/* Bouton de réinitialisation */}
           <div className={`mt-6 pt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-300'}`}>
             <button
               className={`w-full p-2 text-sm rounded-md transition ${
@@ -289,8 +284,7 @@ const UpdatePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Main content area */}
-        <div className="flex-1 p-6 overflow-auto">
+        <div className="flex-1 mr-2 pl-4 overflow-auto">
           {step === 1 && (
             <div>
               <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-blue-400' : 'text-gray-800'}`}>
@@ -320,7 +314,7 @@ const UpdatePage: React.FC = () => {
                   className={`px-4 py-2 rounded-md transition ${
                     !jsonFile.file || !dbFile.file 
                       ? (isDarkMode ? 'bg-blue-800 text-blue-300 opacity-50 cursor-not-allowed' : 'bg-blue-300 text-blue-700 opacity-50 cursor-not-allowed')
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
                   }`}
                   onClick={() => setStep(2)}
                   disabled={!jsonFile.file || !dbFile.file}
@@ -332,29 +326,31 @@ const UpdatePage: React.FC = () => {
           )}
 
           {step === 2 && (
-            <div>
+            <div className="flex flex-col h-full max-h-full">
               <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-blue-400' : 'text-gray-800'}`}>
-                Structure JSON
+                Structure JSON et Correspondance
               </h2>
               
-              <div className="grid grid-cols-2 gap-6">
-                <div>
+              <div className="grid grid-cols-2 gap-6 flex-1 overflow-hidden" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+                <div className="flex flex-col h-full overflow-hidden">
                   <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Aperçu JSON
                   </label>
-                  <JsonPreview 
-                    jsonContent={jsonContent}
-                    className="mb-4"
-                    isDarkMode={isDarkMode}
-                  />
+                  <div className="flex-1 min-h-0">
+                    <JsonPreview 
+                      jsonContent={jsonContent}
+                      className="h-full"
+                      isDarkMode={isDarkMode}
+                    />
+                  </div>
                 </div>
                 
-                <div>
+                <div className="flex flex-col h-full overflow-hidden">
                   <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Chemin racine JSON
                   </label>
                   <p className={`text-sm mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Spécifiez le chemin pour accéder aux données de mise à jour
+                    Spécifiez le chemin pour accéder aux données à mettre à jour (ex: data.users[])
                   </p>
                   <div className="flex mb-4">
                     <input
@@ -370,16 +366,18 @@ const UpdatePage: React.FC = () => {
                     />
                   </div>
                   
-                  <div>
+                  <div className="flex-1 min-h-0 flex flex-col">
                     <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                       Structure détectée
                     </label>
-                    <JsonPathExplorer 
-                      jsonFilePath={jsonFile.path}
-                      onPathSelect={setJsonRoot}
-                      selectedPath={jsonRoot}
-                      isDarkMode={isDarkMode}
-                    />
+                    <div className="flex-1 min-h-0">
+                      <JsonPathExplorer 
+                        jsonFilePath={jsonFile.path}
+                        onPathSelect={setJsonRoot}
+                        selectedPath={jsonRoot}
+                        isDarkMode={isDarkMode}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -396,11 +394,7 @@ const UpdatePage: React.FC = () => {
                   Retour
                 </button>
                 <button
-                  className={`px-4 py-2 rounded-md transition ${
-                    !jsonRoot 
-                      ? (isDarkMode ? 'bg-blue-800 text-blue-300 opacity-50 cursor-not-allowed' : 'bg-blue-300 text-blue-700 opacity-50 cursor-not-allowed')
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
                   onClick={() => setStep(3)}
                   disabled={!jsonRoot}
                 >
@@ -575,7 +569,6 @@ const UpdatePage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Section de progression et logs */}
               {(isProcessing || progress) && (
                 <div className="mt-6">
                   <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -625,7 +618,6 @@ const UpdatePage: React.FC = () => {
                 </div>
               )}
 
-              {/* Section des résultats après mise à jour réussie */}
               {!isProcessing && progress && progress.processed === progress.total && (
                 <div className={`mt-6 p-4 border rounded-md mb-8 ${
                   isDarkMode 

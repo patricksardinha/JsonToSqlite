@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+@plugin 'tailwind-scrollbar';
+
+.overflow-auto, .overflow-y-auto, .overflow-x-auto {
+    @apply scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent dark:scrollbar-thumb-gray-600 pr-2;
+}

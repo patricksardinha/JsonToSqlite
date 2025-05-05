@@ -3,7 +3,7 @@ mod db;
 mod json;
 
 use commands::{
-    db_analyze_table, db_get_tables, import_json_to_sqlite, json_analyze_structure,
+    db_analyze_table, db_get_tables, import_json_to_sqlite, json_analyze_structure, json_analyze_structure_progressive,
     json_get_sample, update_sqlite_from_json,
 };
 
@@ -15,6 +15,7 @@ pub fn run() {
             db_get_tables,
             db_analyze_table,
             json_analyze_structure,
+            json_analyze_structure_progressive,
             json_get_sample,
             import_json_to_sqlite,
             update_sqlite_from_json,

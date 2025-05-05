@@ -15,9 +15,6 @@ const Home: React.FC = () => {
               <h1 className={`text-4xl font-bold mb-4 text-center ${isDarkMode ? 'text-gray-200' : 'text-gray-600'}`}>
                 JSON SQLite Manager
               </h1>
-              <p className={`text-xl text-center ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                La puissance pour gérer vos transfert de données entre JSON et SQLite
-              </p>
             </div>
             
             {/* Fonctionnalités principales */}
@@ -30,6 +27,7 @@ const Home: React.FC = () => {
                   <p className={`mb-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                     Transférez des données depuis un fichier JSON vers une table SQLite.
                     Définissez des mappages, des valeurs par défaut et des transformations.
+                    Vérifiez vos importations avec des "dry run".
                   </p>
                   <div className="flex justify-center">
                     <Link 
@@ -49,7 +47,7 @@ const Home: React.FC = () => {
                 <div className="p-6">
                   <p className={`mb-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                     Mettez à jour des enregistrements existants dans une base de données SQLite
-                    à partir de données JSON, en utilisant une colonne clé pour les faire correspondre.
+                    à partir de données JSON, en utilisant une colonne de référence pour les faire correspondre.
                   </p>
                   <div className="flex justify-center">
                     <Link 

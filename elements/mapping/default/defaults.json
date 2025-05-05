@@ -1,8 +1,0 @@
-{
-  "defaults": {
-    "process_area_id": 63
-  },
-  "dynamic": {
-    "identifier": "PA_{{UUID}}"
-  }
-}

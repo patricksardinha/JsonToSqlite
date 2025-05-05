@@ -3,14 +3,12 @@ import React, { useState, useEffect } from 'react';
 interface JsonPreviewProps {
   jsonContent: string;
   className?: string;
-  maxHeight?: string;
   isDarkMode?: boolean;
 }
 
 const JsonPreview: React.FC<JsonPreviewProps> = ({ 
   jsonContent, 
   className = '',
-  maxHeight = '400px',
   isDarkMode = false
 }) => {
   const [formattedJson, setFormattedJson] = useState<string>('');
@@ -38,7 +36,6 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({
   }, [jsonContent]);
 
   const formatSyntax = (json: string): JSX.Element => {
-    // Coloration syntaxique adaptée au mode sombre ou clair
     const keyColor = isDarkMode ? 'text-purple-400' : 'text-purple-600';
     const stringColor = isDarkMode ? 'text-green-400' : 'text-green-600';
     const numberColor = isDarkMode ? 'text-blue-400' : 'text-blue-600';
@@ -56,7 +53,7 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({
   };
 
   return (
-    <div className={className}>
+    <div className={`flex flex-col h-full ${className}`}>
       {error ? (
         <div className={`p-3 rounded-md mb-2 ${isDarkMode 
           ? 'bg-red-900 text-red-300 border border-red-800' 
@@ -66,12 +63,12 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({
         </div>
       ) : null}
       <div 
-        className={`font-mono text-xs p-4 rounded-md border overflow-auto whitespace-pre ${
+        className={`font-mono text-xs p-4 rounded-md border overflow-auto whitespace-pre flex-1 scrollbar-styled ${
           isDarkMode 
             ? 'bg-gray-800 border-gray-700' 
             : 'bg-gray-50 border-gray-300'
         }`}
-        style={{ maxHeight }}
+        style={{ minHeight: 0 }} 
       >
         {formatSyntax(formattedJson)}
       </div>

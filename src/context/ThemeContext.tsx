@@ -31,7 +31,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(getInitialTheme());
 
-  // Appliquer les classes Tailwind au body
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDarkMode);
     

@@ -50,7 +50,7 @@ const Toast: React.FC<ToastProps> = ({ type, message, onClose }) => {
     // Auto-masquage après 5 secondes
     const timer = setTimeout(() => {
       setIsVisible(false);
-      setTimeout(onClose, 300); // Laisser le temps à l'animation de se terminer
+      setTimeout(onClose, 300);
     }, 5000);
     
     return () => clearTimeout(timer);

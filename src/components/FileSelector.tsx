@@ -31,14 +31,11 @@ const FileSelector: React.FC<FileSelectorProps> = ({
 
       if (selected && !Array.isArray(selected)) {
         // Si un fichier est sélectionné et que ce n'est pas un tableau (single selection)
-        // Vous n'avez pas accès au File objet, mais vous avez le chemin
         const filePath = selected;
         
         // Récupérer le nom du fichier à partir du chemin
         const fileName = filePath.split(/[\\/]/).pop() || '';
         
-        // Vous pouvez créer un objet File pour la compatibilité, mais il ne sera pas utilisé
-        // C'est surtout pour l'affichage
         onChange({
           file: new File([], fileName),
           path: filePath

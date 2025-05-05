@@ -4,6 +4,8 @@ use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+use tauri::Window;
+use tauri::Emitter;
 
 pub mod extract;
 
@@ -51,6 +53,155 @@ pub fn analyze_structure(json_path: &str) -> Result<Vec<JsonPathInfo>, String> {
     }
 
     Ok(result)
+}
+
+/// Analyse la structure d'un fichier JSON et envoie les chemins progressivement via un événement
+pub fn analyze_structure_progressive(json_path: &str, window: Window) -> Result<(), String> {
+    // Lecture du fichier JSON
+    let json_data = read_json_file(json_path)?;
+    
+    // Partager json_data entre deux threads
+    let json_data = std::sync::Arc::new(json_data);
+    
+    // Clone pour le premier thread
+    let json_data_clone1 = json_data.clone();
+
+    // Créer un canal pour envoyer les chemins progressivement
+    let (tx, rx) = std::sync::mpsc::channel();
+    
+    // Lancer l'extraction dans un thread dédié
+    std::thread::spawn(move || {
+        // Utiliser une fonction modifiée qui envoie les chemins via le canal
+        let mut sent_paths = std::collections::HashSet::new();
+        extract_paths_progressive("", &*json_data_clone1, tx, 0, &mut sent_paths);
+    });
+    
+    // Clone pour le second thread
+    let json_data_clone2 = json_data.clone();
+    
+    // Clone de la window pour le second thread
+    let window_clone = window.clone();
+    
+    // Traiter les chemins reçus et les envoyer à l'interface
+    std::thread::spawn(move || {
+        let mut count = 0;
+        for path in rx {
+            count += 1;
+            
+            // Extraire un échantillon de valeur pour ce chemin
+            let value = get_value_by_path(&json_data_clone2, &path);
+            let sample = match value {
+                Some(v) => format!("{}", v),
+                None => String::from(""),
+            };
+
+            let data_type = match value {
+                Some(JsonValue::Null) => "null",
+                Some(JsonValue::Bool(_)) => "boolean",
+                Some(JsonValue::Number(_)) => "number",
+                Some(JsonValue::String(_)) => "string",
+                Some(JsonValue::Array(_)) => "array",
+                Some(JsonValue::Object(_)) => "object",
+                None => "unknown",
+            };
+            
+            let truncated_sample = if sample.len() > 50 {
+                let truncated = truncate_utf8_string(&sample, 47);
+                format!("{}...", truncated)
+            } else {
+                sample
+            };
+            
+            // Créer l'objet JsonPathInfo
+            let path_info = JsonPathInfo {
+                path,
+                data_type: data_type.to_string(),
+                sample: truncated_sample,
+            };
+            
+            // Envoyer l'événement à l'interface
+            let _ = window_clone.emit("json-path-discovered", &path_info);
+            
+            // Pour éviter de surcharger l'interface, on peut regrouper les envois
+            if count % 10 == 0 {
+                std::thread::sleep(std::time::Duration::from_millis(1));
+            }
+        }
+        
+        // Envoyer un événement de fin d'analyse
+        let _ = window_clone.emit("json-path-analysis-complete", ());
+    });
+    
+    Ok(())
+}
+
+/// Version modifiée d'extract_paths qui envoie les chemins via un canal
+fn extract_paths_progressive(prefix: &str, value: &JsonValue, sender: std::sync::mpsc::Sender<String>, depth: usize, sent_paths: &mut std::collections::HashSet<String>) {
+    // Limite de profondeur pour éviter les récursions infinies
+    if depth > 10 {
+        return;
+    }
+
+    // Ajout d'un délai artificiel pour les tests
+    //std::thread::sleep(std::time::Duration::from_millis(50));
+
+    match value {
+        JsonValue::Object(map) => {
+            // Ajoute le chemin actuel
+            if !prefix.is_empty() && !sent_paths.contains(prefix) {
+                let _ = sender.send(prefix.to_string());
+                sent_paths.insert(prefix.to_string());
+            }
+
+            // Parcourt les propriétés de l'objet
+            for (key, val) in map {
+                let new_prefix = if prefix.is_empty() {
+                    key.clone()
+                } else {
+                    format!("{}.{}", prefix, key)
+                };
+
+                extract_paths_progressive(&new_prefix, val, sender.clone(), depth + 1, sent_paths);
+            }
+        }
+        JsonValue::Array(arr) => {
+            // Ajoute le chemin actuel avec notation tableau
+            let array_path = format!("{}[]", prefix);
+            if !prefix.is_empty() && !sent_paths.contains(&array_path) {
+                let _ = sender.send(array_path.clone());
+                sent_paths.insert(array_path.clone());
+            }
+
+            // Si l'array n'est pas vide, analyse UNIQUEMENT le premier élément
+            if !arr.is_empty() {
+                match &arr[0] {
+                    JsonValue::Object(inner_map) => {
+                        for (key, val) in inner_map {
+                            let new_prefix = format!("{}.{}", array_path, key);
+                            if !sent_paths.contains(&new_prefix) {
+                                let _ = sender.send(new_prefix.clone());
+                                sent_paths.insert(new_prefix.clone());
+                            }
+                        }
+                    },
+                    // Pour les tableaux imbriqués, on continue avec une nouvelle notation tableau
+                    JsonValue::Array(_) => {
+                        let nested_array_path = format!("{}[]", array_path);
+                        extract_paths_progressive(&array_path, &arr[0], sender.clone(), depth + 1, sent_paths);
+                    },
+                    // Pour les valeurs primitives, on ne fait rien de plus car le chemin a déjà été ajouté
+                    _ => {}
+                }
+            }
+        }
+        _ => {
+            // Pour les valeurs simples, ajoute simplement le chemin
+            if !prefix.is_empty() && !sent_paths.contains(prefix) {
+                let _ = sender.send(prefix.to_string());
+                sent_paths.insert(prefix.to_string());
+            }
+        }
+    }
 }
 
 pub fn truncate_utf8_string(s: &str, max_chars: usize) -> String {

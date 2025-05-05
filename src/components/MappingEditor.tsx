@@ -88,11 +88,9 @@ const MappingEditor: React.FC<MappingEditorProps> = ({
     const newMapping: Record<string, string> = {};
     
     dbColumns.forEach(column => {
-      // Ne pas utiliser les chemins JSON complets, mais uniquement les noms de propriétés
-      // simples qui correspondent aux colonnes de la base de données
       const matchingProperty = column.name.toLowerCase();
       
-      // Si nous avons un échantillon, utilisons-le pour vérifier si la propriété existe
+      // Echantillon pour vérifier si la propriété existe
       if (samples && samples[matchingProperty] !== undefined) {
         newMapping[matchingProperty] = column.name;
         return;
